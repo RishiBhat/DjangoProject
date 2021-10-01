@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .models import Product, Contact, Orders, OrderUpdate
 from math import ceil
 import json
+from django.views.decorators.csrf import csrf_exempt  
 
 # Create your views here.
 from django.http import HttpResponse
@@ -46,7 +47,7 @@ def tracker(request):
                 updates = []
                 for item in update:
                     updates.append({'text': item.update_desc, 'time': item.timestamp})
-                    response = json.dumps(updates, default=str)
+                    response = json.dumps([updates, order[0].items_json], default=str)
                 return HttpResponse(response)
             else:
                 return HttpResponse('{}')
@@ -55,9 +56,30 @@ def tracker(request):
 
     return render(request, 'store/tracker.html')
 
+def searchMatch(query, item):
+        if query in item.desc or query in item.product_name or query in item.category:
+            return True 
+        else:
+            return False and render(query, item, ('store/index.html ')) 
 
 def search(request):
-    return render(request, 'store/search.html')
+        query= request.GET.get('search')
+        allProds = []
+        catprods = Product.objects.values('category', 'id')
+        cats = {item['category'] for item in catprods}
+        for cat in cats:
+            prodtemp  = Product.objects.filter(category=cat)
+            prod = [item for item  in prodtemp if searchMatch(query, item)]
+            n = len(prod)
+            if len(prod)!=0:
+                nSlides = n // 4 + ceil((n / 4) - (n // 4))
+                allProds.append([prod, range(1, nSlides), nSlides])
+            params = {'allProds':allProds, 'msg':""}
+            if len (allProds==0) or len(query)< 4 :      
+                params={'msg':"Please order the right package"}
+        return render(request, 'store/index.html', params)
+
+
 
 
 def productView(request, myid):
@@ -71,6 +93,7 @@ def checkout(request):
     if request.method=="POST":
         items_json = request.POST.get('itemsJson', '')
         name = request.POST.get('name', '')
+        amount = request.POST.get('amount', '')
         email = request.POST.get('email', '')
         address = request.POST.get('address1', '') + " " + request.POST.get('address2', '')
         city = request.POST.get('city', '')
@@ -78,64 +101,41 @@ def checkout(request):
         zip_code = request.POST.get('zip_code', '')
         phone = request.POST.get('phone', '')
         order = Orders(items_json=items_json, name=name, email=email, address=address, city=city,
-                       state=state, zip_code=zip_code, phone=phone)
+                       state=state, zip_code=zip_code, phone=phone, amount= amount)
         order.save()
         update = OrderUpdate(order_id=order.order_id, update_desc="The order has been placed")
         update.save()
         thank = True
         id = order.order_id
-        return render(request, 'store/checkout.html', {'thank':thank, 'id': id})
+
+        param_dict={ 
+            
+        }
+        
+        #return render(request, 'store/checkout.html', {'thank':thank, 'id': id})
     return render(request, 'store/checkout.html')
 
+#paytm will send you post request here 
+ 
+def blog(request):
+    return render(request,'store/blog.html')
 
 
+def handle(request):
+    return render 
+
+def services (request):
+    return HttpResponse("This is the service page")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def services(request):
-    return HttpResponse("How can I help you?")
 def productview(request):
-    return HttpResponse("These are the several products we have")
+    return HttpResponse("this is the product view")
 
-def search (request):
-    return HttpResponse("Enter down your query here")
+#paytm will be integrated with the use of merchant_id and the Merchant key 
 
-def product_id(request):
-    return HttpResponse("this is the  product  id ")
-
+#request paytm to trasnfer the  amount to your account after payment by user 
+# paytm will send the post requst here 
+@csrf_exempt
+def handlerequest (request):
+    return HttpResponse("Checkout")
+    pass 

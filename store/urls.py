@@ -14,6 +14,8 @@ urlpatterns = [
     path('contact/',views.contact,name="Call us"),
     path('tracker/',views.tracker,name="Tracke your product"),
     path('checkout/',views.checkout,name="Billing"),
-    path('search/',views.search,name='Enter your query'),
+    path('search/',views.search,name='Search Items'),
     path('productview/',views.productview,name="Products we have"),
+    path('handlerequest/', views.handlerequest, name="paytm"),
+    path('blogpost/',views.index, name="Blogs are visible here"),
 ]

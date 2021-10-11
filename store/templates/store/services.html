@@ -1,0 +1,31 @@
+{% extends 'store/basic.html'%}
+
+{% block title %} Services page {% endblock%}
+
+{% block body %}
+
+
+The body page pagee I will inculde here 
+
+
+{% endblock %}
+
+{% block js %}
+
+<script> 
+
+$.(#console.log('working'))
+
+if( localStorage.getItem('cart')==null){
+
+    <JSON class="parse">This will be the image ui I will write here </JSON>
+}
+
+else 
+[
+    <JSON class="parse"> Please go through this page</JSON>
+    <a href="/store/products/{{i.id}}"><button id="qv{{i.id}}" class="btn btn-primary cart">QuickView</button></a>
+]
+
+
+{% endblock%}
